@@ -1197,3 +1197,174 @@ function pintarTablaFacturas(facturas) {
         cuerpoTabla.appendChild(fila);
     });
 }
+
+// Asignar el evento de clic al botón "Agregar Artículo"
+document.getElementById('addArticle').addEventListener('click', () => {
+    // Obtener el select con el id 'nature'
+    const selectElement = document.getElementById('nature');
+    console.log(selectElement);  // Muestra el objeto completo del select
+
+    const facturaTipos = selectElement.value;
+    console.log("Tipo de factura: ", facturaTipos);  // Mostrar el valor capturado del select
+
+    // Obtener los datos del NIT
+    const nitNombre = document.getElementById('clientName').value;
+    const nitDocumento = document.getElementById('documentoName').value;
+    const nitCupo = parseFloat(document.getElementById('creditLimit').value) || 0;
+    const nitPlazo = parseInt(document.getElementById('paymentTerm').value) || 0;
+    const nitCartera = parseFloat(document.getElementById('portfolio').value) || 0;
+    const nitDisponible = parseFloat(document.getElementById('available').value) || 0;
+
+    // Obtener los datos de la factura
+    const facturaNumero = document.getElementById('facturaNumero').value;
+    const facturaFecha = document.getElementById('invoiceDate').value;
+    const facturaFechaVencimiento = document.getElementById('dueDate').value;
+
+    // Obtener los datos de los artículos
+    const articulos = [];
+    console.log("acá está:", articulos)
+    const rows = document.querySelectorAll('#articlesTableBody tr');
+    rows.forEach(row => {
+        const articuloId = row.getAttribute('data-article-id');
+        const articuloCodigo = row.cells[1].textContent; // Smartphone Galaxy X
+        const articuloNombre = row.cells[2].textContent; // Samsung
+        const articuloLaboratorio = row.cells[3].textContent; // Tipo de factura (COMPRA o VENTA)
+        const articuloPrecioVenta = parseFloat(row.cells[4].textContent.replace('$', '').replace(',', '')) || 0; // 450.00
+        const articuloSaldo = parseInt(row.cells[5].textContent) || 0; // 150
+        const articuloCosto = parseFloat(row.cells[6].textContent.replace('$', '').replace(',', '')) || 0; // 300.00
+        
+        articulos.push({
+            articuloId,
+            articuloCodigo,
+            articuloNombre,
+            articuloLaboratorio,
+            articuloPrecioVenta,
+            articuloSaldo,
+            articuloCosto
+        });
+    });
+
+    // Mostrar los datos de los artículos en consola
+    console.log(articulos);
+
+    // Calcular el total de la factura usando la función existente
+    const facturaTotal = calcularTotalFactura();
+
+    // Mostrar los datos en la consola de forma organizada
+    console.log({
+        "Datos de Factura": {
+            "Factura Número": facturaNumero,
+            "Fecha de Factura": facturaFecha,
+            "Fecha de Vencimiento": facturaFechaVencimiento,
+            "Tipo de Factura": articulos[0].articuloLaboratorio,
+            "facturaTotal": facturaTotal,
+        },
+        "Datos de NIT": {
+            "Nombre": nitNombre,
+            "Documento": nitDocumento,
+            "Cupo": nitCupo,
+            "Plazo": nitPlazo,
+            "Cartera": nitCartera,
+            "Disponible": nitDisponible
+        },
+        "Artículos Agregados": articulos
+    });
+
+    // Deshabilitar los campos del cliente después de agregar el artículo
+    document.getElementById('clientNit').disabled = true;
+    document.getElementById('clientName').disabled = true;
+    document.getElementById('documentoName').disabled = true;
+    document.getElementById('creditLimit').disabled = true;
+    document.getElementById('paymentTerm').disabled = true;
+    document.getElementById('portfolio').disabled = true;
+    document.getElementById('available').disabled = true;
+
+    // Deshabilitar el select de naturaleza después de agregar un artículo
+    document.getElementById('nature').disabled = true;
+});
+
+// Evento para cancelar la factura y habilitar los campos nuevamente
+document.getElementById('cancelInvoice').addEventListener('click', () => {
+    // Habilitar los campos del cliente
+    document.getElementById('clientNit').disabled = false;
+    document.getElementById('clientName').disabled = false;
+    document.getElementById('documentoName').disabled = false;
+    document.getElementById('creditLimit').disabled = false;
+    document.getElementById('paymentTerm').disabled = false;
+    document.getElementById('portfolio').disabled = false;
+    document.getElementById('available').disabled = false;
+
+    // Habilitar el select de naturaleza
+    document.getElementById('nature').disabled = false;
+});
+
+// Evento de clic para guardar la factura
+document.getElementById('saveInvoice').addEventListener('click', async () => {
+    const articulos = [];
+    const rows = document.querySelectorAll('#articlesTableBody tr');
+    rows.forEach(row => {
+        const articuloId = row.getAttribute('data-article-id');
+        const articuloCodigo = row.cells[1].textContent;
+        const articuloNombre = row.cells[2].textContent;
+        const articuloLaboratorio = row.cells[3].textContent;
+        const articuloPrecioVenta = parseFloat(row.cells[4].textContent.replace('$', '').replace(',', '')) || 0;
+        const articuloSaldo = parseInt(row.cells[5].textContent) || 0;
+        const articuloCosto = parseFloat(row.cells[6].textContent.replace('$', '').replace(',', '')) || 0;
+
+        articulos.push({
+            articuloId,
+            articuloCodigo,
+            articuloNombre,
+            articuloLaboratorio,
+            articuloPrecioVenta,
+            articuloSaldo,
+            articuloCosto
+        });
+    });
+
+    if (articulos.length === 0) {
+        console.error("No se han agregado artículos.");
+        return;
+    }
+
+    const facturaTipo = articulos[0].articuloLaboratorio;
+    const facturaTotal = calcularTotalFactura();
+    const nitId = parseInt(document.getElementById('nitIdSeleccionado').value);
+
+    if (!facturaTipo || isNaN(nitId)) {
+        alert("Completa todos los campos requeridos correctamente.");
+        return;
+    }
+
+    const facturaData = {
+        facturaTipo: facturaTipo,
+        facturaTotal: facturaTotal,
+        nit: { nitId: nitId }
+    };
+
+    try {
+        const facturaResponse = await fetch('http://localhost:8080/api/factura', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(facturaData)
+        });
+
+        if (!facturaResponse.ok) {
+            const errorText = await facturaResponse.text();
+            console.error('Error al guardar la factura:', facturaResponse.status, errorText);
+            return;
+        }
+
+        const factura = await facturaResponse.json();
+        console.log('Factura guardada correctamente:', factura);
+
+        await guardarFacturaKardexConIdEstimado(factura.facturaId, facturaTipo);
+
+        alert('Factura y detalles guardados exitosamente.');
+    } catch (error) {
+        console.error('Error en el proceso de guardado:', error);
+        alert('Error al guardar la factura. Revisa la consola.');
+    }
+});
