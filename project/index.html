@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Facturación</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" data-expanded="true">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="bi bi-receipt logo-icon"></i>
+                    <span class="logo-text">Kardex One</span>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-group">
+                    <h3 class="nav-group-title">Principal</h3>
+                    <a href="#" class="nav-item active" id="nav-registro" title="Dashboard">
+                        <i class="bi bi-grid-1x2"></i>
+                        <span>Registro</span>
+                    </a>
+                </div>
+
+                <div class="nav-group">
+                    <h3 class="nav-group-title">Gestión</h3>
+                    <a href="#" class="nav-item" id="nav-clientes" title="Clientes">
+                        <i class="bi bi-people"></i>
+                        <span>Clientes</span>
+                    </a>
+                    <a href="#" class="nav-item" id="nav-articulos" title="Articulos">
+                        <i class="bi bi-box"></i>
+                        <span>Articulos</span>
+                    </a>
+                    <a href="#" class="nav-item" id="nav-facturas" title="Facturas">
+                        <i class="bi bi-receipt"></i>
+                        <span>Facturas</span>
+                    </a>
+                    <a href="#" class="nav-item" id="nav-reportes" title="Reportes">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Reportes</span>
+                    </a>
+                </div>
+
+                <div class="nav-group">
+                    <h3 class="nav-group-title">Configuración</h3>
+                    <a href="#" class="nav-item" id="nav-ajustes" title="Ajustes">
+                        <i class="bi bi-gear"></i>
+                        <span>Ajustes</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-menu-toggle" aria-label="Toggle Mobile Menu">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+
+                <div class="header-right">
+                    <div class="user-profile">
+                        <img src="https://ui-avatars.com/api/?name=JR&background=1976D2&color=fff" alt="Admin" class="profile-image">
+                        <span class="profile-name" style="user-select: none;">Juan Rivero</span>
+                    </div>
+                </div>
+            </header>
+
+            <div id="section-registro" class="content-section">
+                <!-- Breadcrumb -->
+                <nav class="breadcrumb" aria-label="breadcrumb">
+                    <ol>
+                        <li><a href="#">Inicio</a></li>
+                        <li class="current">Nueva Factura</li>
+                    </ol>
+                </nav>
+
+                <!-- Invoice Form -->
+                <div class="invoice-form-container">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Nueva Factura</h2>
+                        </div>
+                        <div class="card-body">
+                            <!-- Invoice Data Section -->
+                            <section class="form-section">
+                                <h3 class="section-title">Datos de Factura</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="facturaNumero">Número de Factura</label>
+                                        <input type="text" id="facturaNumero" readonly name="facturaNumero" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="invoiceDate">Fecha</label>
+                                        <input type="text" id="invoiceDate" name="invoiceDate" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="dueDate">Fecha de Vencimiento</label>
+                                        <input type="date" id="dueDate" readonly name="dueDate" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nature">Naturaleza</label>
+                                        <select id="nature" name="nature" required>
+                                            <option value="" disabled selected>Selecciona el tipo de factura</option>
+                                            <option value="COMPRA">+ (Entrada)</option>
+                                            <option value="VENTA">- (Salida)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Client Data Section -->
+                            <section class="form-section">
+                                <h3 class="section-title">Datos del Cliente</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="clientNit">NIT del Cliente</label>
+                                        <div class="input-group">
+                                            <input type="text" id="clientNit" name="clientNit" required>
+                                            <button type="button" class="btn-secondary" id="searchClient">
+                                                <i class="bi bi-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="nitIdSeleccionado">
+                                    <div class="form-group">
+                                        <label for="clientName">Nombre</label>
+                                        <input type="text" id="clientName" name="clientName" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="documentoName">Documento</label>
+                                        <input type="text" id="documentoName" name="documentoName" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="creditLimit">Cupo</label>
+                                        <input type="text" id="creditLimit" name="creditLimit" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="paymentTerm">Plazo</label>
+                                        <input type="text" id="paymentTerm" name="paymentTerm" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="portfolio">Cartera</label>
+                                        <input type="text" id="portfolio" name="portfolio" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="available">Disponible</label>
+                                        <input type="text" id="available" name="available" readonly>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Article Data Section -->
+                            <section class="form-section">
+                                <h3 class="section-title">Datos del Artículo</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="articleCode">Código Artículo</label>
+                                        <div class="input-group">
+                                            <input type="text" id="articleCode" name="articleCode" required>
+                                            <button type="button" class="btn-secondary" id="searchArticle">
+                                                <i class="bi bi-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="articleName">Nombre</label>
+                                        <input type="text" id="articleName" name="articleName" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="laboratory">Laboratorio</label>
+                                        <input type="text" id="laboratory" name="laboratory" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="balance">Saldo</label>
+                                        <input type="number" id="balance" name="balance" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="units">Unidades</label>
+                                        <input type="number" id="units" name="units" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="costs">Costos</label>
+                                        <input type="number" id="costs" name="costs" step="0.01" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="salePrice">Precio de Venta</label>
+                                        <input type="number" id="salePrice" name="salePrice" step="0.01" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="totalSale">Total de Venta</label>
+                                        <input type="number" id="totalSale" name="totalSale" step="0.01" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="totalCosts">Total Costos</label>
+                                        <input type="number" id="totalCosts" name="totalCosts" step="0.01" required>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn-primary" id="addArticle">
+                                        <i class="bi bi-plus"></i>
+                                        Agregar Artículo
+                                    </button>
+                                </div>
+                            </section>
+
+                            <!-- Articles Grid -->
+                            <div class="articles-grid">
+                                <h3>Artículos Agregados</h3>
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Código</th>
+                                                <th>Nombre</th>
+                                                <th>Laboratorio</th>
+                                                <th>Naturaleza</th>
+                                                <th>Saldo</th>
+                                                <th>Unidades</th>
+                                                <th>Costos</th>
+                                                <th>Precio Venta</th>
+                                                <th>Total Venta</th>
+                                                <th>Total Costos</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="articlesTableBody">
+                                            <!-- Dynamic content will be added here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="form-footer">
+                                <button type="button" class="btn-secondary" id="cancelInvoice">
+                                    <i class="bi bi-x"></i>
+                                    Cancelar
+                                </button>
+                                <button type="button" class="btn-primary" id="saveInvoice">
+                                    <i class="bi bi-save"></i>
+                                    Guardar Factura
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Client Search Modal -->
+                <div class="modal" id="clientModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Buscar Cliente</h3>
+                            <button class="modal-close">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="search-container">
+                                <input type="text" class="search-input" placeholder="Buscar por NIT o nombre...">
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>NIT</th>
+                                            <th>Nombre</th>
+                                            <th>Documento</th>
+                                            <th>Cupo</th>
+                                            <th>Plazo</th>
+                                            <th>Marcar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Article Search Modal -->
+                <div class="modal" id="articleModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Buscar Artículo</h3>
+                            <button class="modal-close">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="search-container">
+                                <input type="text" class="search-input" placeholder="Buscar por código o nombre...">
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Código</th>
+                                            <th>Nombre</th>
+                                            <th>Laboratorio</th>
+                                            <th>Precio</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- SECCIÓN CLIENTES -->
+            <div id="section-clientes" class="content-section" style="display: none;">
+                <!-- Breadcrumb -->
+                <nav class="breadcrumb" aria-label="breadcrumb">
+                    <ol>
+                        <li><a href="#">Inicio</a></li>
+                        <li class="current">Clientes</li>
+                    </ol>
+                </nav>
+
+                <div class="card">
+
+
+                    <div class="card-body">
+                        <main>
+                            <div class="container">
+                                <!-- FORMULARIO NUEVO CLIENTE -->
+                                <section id="clientFormSection">
+                                    <h2>Registrar Nuevo Cliente</h2>
+                                    <h3></h3>
+                                    <form id="clientForm">
+                                        <div class="form-group">
+                                            <label for="nitNombre">Nombre o Razón Social</label>
+                                            <input type="text" id="nitNombre" required />
+                                            <span class="error-message" id="nitNombreError"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="nitDocumento">Documento</label>
+                                            <input type="text" id="nitDocumento" required />
+                                            <span class="error-message" id="nitDocumentoError"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="nitCupo">Cupo (COP)</label>
+                                            <input type="number" id="nitCupo" min="0" step="0.01" required />
+                                            <span class="error-message" id="nitCupoError"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="nitPlazo">Plazo (días)</label>
+                                            <input type="number" id="nitPlazo" min="0" required />
+                                            <span class="error-message" id="nitPlazoError"></span>
+                                        </div>
+                                        <div class="form-actions">
+                                            <button type="submit" id="saveNitBtn" class="primary-button">Guardar</button>
+                                        </div>
+                                        <h1> </h1>
+                                    </form>
+                                    <hr />
+                                </section>
+
+                                <div class="table-container">
+                                    <table id="clientsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>NOMBRE</th>
+                                                <th class="sortable" data-sort="documento">
+                                                    DOCUMENTO <i class="material-icons">arrow_drop_down</i>
+                                                </th>
+                                                <th>CUPO</th>
+                                                <th>PLAZO</th>
+                                                <th>ACCIONES</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="clientsTableBody">
+                                            <!-- Client data will be populated here by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                    <div class="table-footer">
+                                        <span id="clientCount">0 cliente(s) en total</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+            </div>
+                        
+
+            <!-- SECCIÓN ARTÍCULOS -->
+            <div id="section-articulos" class="content-section" style="display: none;">
+                <!-- Breadcrumb -->
+                <nav class="breadcrumb" aria-label="breadcrumb">
+                    <ol>
+                        <li><a href="#">Inicio</a></li>
+                        <li class="current">Artículos</li>
+                    </ol>
+                </nav>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Gestión de Artículos</h2>
+                    </div>
+                    <div class="card-body">
+                        <main>
+                            <div class="container">
+                                <!-- FORMULARIO NUEVO ARTÍCULO -->
+                                <section id="articleFormSection">
+                                    <h3>Registrar Nuevo Artículo</h3>
+                                    <form id="articleForm">
+                                        <div class="form-group">
+                                            <label for="articuloCodigo">Código</label>
+                                            <input type="text" id="articuloCodigo" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="articuloNombre">Nombre</label>
+                                            <input type="text" id="articuloNombre" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="articuloLaboratorio">Laboratorio</label>
+                                            <input type="text" id="articuloLaboratorio" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="articuloSaldo">Saldo</label>
+                                            <input type="number" id="articuloSaldo" min="0" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="articuloCosto">Costo (COP)</label>
+                                            <input type="number" id="articuloCosto" min="0" step="0.01" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="articuloPrecioVenta">Precio Venta (COP)</label>
+                                            <input type="number" id="articuloPrecioVenta" min="0" step="0.01" required />
+                                        </div>
+                                        <div class="form-actions">
+                                            <button type="submit" id="saveArticleBtn" class="primary-button">Guardar</button>
+                                        </div>
+                                    </form>
+                                    <hr />
+                                </section>
+
+                                <div class="table-container">
+                                    <table id="articlesTable" class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>CÓDIGO</th>
+                                                <th>NOMBRE</th>
+                                                <th>LABORATORIO</th>
+                                                <th>SALDO</th>
+                                                <th>COSTO</th>
+                                                <th>PRECIO VENTA</th>
+                                                <th>ACCIONES</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="mainArticlesTableBody">
+                                            <!-- Los artículos se cargarán dinámicamente aquí -->
+                                        </tbody>
+                                    </table>
+                                    <div class="table-footer">
+                                        <span id="articleCount">0 artículo(s) en total</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN FACTURAS -->
+            <div id="section-facturas" class="content-section" style="display: none;">
+                <!-- Breadcrumb -->
+                <nav class="breadcrumb" aria-label="breadcrumb">
+                    <ol>
+                        <li><a href="#">Inicio</a></li>
+                        <li class="current">Facturas</li>
+                    </ol>
+                </nav>
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Listado de Facturas</h2>
+                    </div>
+                    <div class="card-body">
+                        <p>Aquí se listarían las facturas existentes o se podrían filtrar.</p>
+
+                        <!-- Tabla de Facturas -->
+                        <div class="table-container">
+                            <table id="facturasTable" class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>NIT</th>
+                                        <th>Fecha</th>
+                                        <th>Fecha Vencimiento</th>
+                                        <th>Tipo</th>
+                                        <th>Total</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="facturasTableBody">
+                                    <!-- Las facturas se cargarán dinámicamente aquí -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- SECCIÓN REPORTES -->
+            <div id="section-reportes" class="content-section" style="display: none;">
+                <!-- Breadcrumb -->
+                <nav class="breadcrumb" aria-label="breadcrumb">
+                    <ol>
+                        <li><a href="#">Inicio</a></li>
+                        <li class="current">Reportes ( PROXIMAMENTE )</li>
+                    </ol>
+                </nav>
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Reportes</h2>
+                    </div>
+                    <div class="card-body">
+                        <p>Panel de reportes por ventas, artículos, clientes, etc.</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const natureSelect = document.getElementById("nature");
+            const totalSale = document.getElementById("totalSale");
+            const totalCosts = document.getElementById("totalCosts");
+            const units = document.getElementById("units");
+            const costs = document.getElementById("costs");
+            const balance = document.getElementById("balance");
+            const salePrice = document.getElementById("salePrice");
+        
+            // Función para aplicar validaciones o mostrar/ocultar campos
+            function updateFieldsBasedOnNature() {
+                const natureValue = natureSelect.value;
+        
+                if (natureValue === "COMPRA") {
+                    // Si es COMPRA, habilitar ciertos campos y esconder otros
+                    balance.readOnly = false;  // Habilitar el campo de saldo
+                    totalSale.readOnly = true;  // Deshabilitar el campo de total de venta
+                    totalCosts.readOnly = true;  // Deshabilitar el campo de total de costos
+                    salePrice.readOnly = true;  // Deshabilitar el campo de precio de venta
+                    units.readOnly = false; // Habilitar el campo de unidades
+                    costs.readOnly = false; // Habilitar el campo de costos
+        
+                    // Ocultar campos que no deben estar disponibles en COMPRA
+                    totalSale.closest('.form-group').style.display = 'none';
+                    totalCosts.closest('.form-group').style.display = 'none';
+                } else if (natureValue === "VENTA") {
+                    // Si es VENTA, habilitar ciertos campos y esconder otros
+                    balance.readOnly = true;  // Deshabilitar el campo de saldo
+                    totalSale.readOnly = false;  // Habilitar el campo de total de venta
+                    totalCosts.readOnly = true;  // Deshabilitar el campo de total de costos
+                    salePrice.readOnly = false;  // Habilitar el campo de precio de venta
+                    units.readOnly = false; // Habilitar el campo de unidades
+                    costs.readOnly = true; // Deshabilitar el campo de costos
+        
+                    // Mostrar campos relacionados con la venta
+                    totalSale.closest('.form-group').style.display = 'block';
+                    totalCosts.closest('.form-group').style.display = 'none';  // Ocultar el campo de costos en VENTA
+                }
+            }
+        
+            // Inicializar las validaciones según la opción seleccionada
+            natureSelect.addEventListener("change", updateFieldsBasedOnNature);
+        
+            // Llamar la función al cargar la página para aplicar las reglas iniciales
+            updateFieldsBasedOnNature();
+        });
+    </script>    
+        
+    <script src="main.js"></script>
+</body>
+</html>
