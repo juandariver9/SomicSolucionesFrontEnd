@@ -1,3 +1,6 @@
+// URL base de la API. Para apuntar a otro servidor, define window.KARDEXONE_API_URL antes de cargar este script.
+const API_URL = window.KARDEXONE_API_URL || 'http://localhost:8080/api';
+
 // Sidebar Toggle
 let selectedNitId = null;
 const sidebar = document.querySelector('.sidebar');
@@ -346,7 +349,7 @@ document.addEventListener('DOMContentLoaded',  () => {
 
 // ------------------- FETCHS -------------------
 function fetchClients() {
-    fetch('http://localhost:8080/api/nit')
+    fetch(`${API_URL}/nit`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Error en la respuesta del servidor');
@@ -405,7 +408,7 @@ document.querySelector('#clientModal .data-table').addEventListener('click', asy
     // Obtener valor de cartera desde API
     let cartera = 0;
     try {
-        const response = await fetch("http://localhost:8080/api/cartera");
+        const response = await fetch(`${API_URL}/cartera`);
         const data = await response.json();
         const carteraCliente = data.find(c => c.nit.nitId == nitId);
         if (carteraCliente) {
@@ -450,7 +453,7 @@ let articulos = [];
 // ------------------------------ ARTICULOS -------------------------------
 // Fetch Articles
 function fetchArticles() {
-    fetch('http://localhost:8080/api/articulo')
+    fetch(`${API_URL}/articulo`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Error en la respuesta del servidor');
@@ -506,7 +509,7 @@ document.querySelector('#articleModal .data-table').addEventListener('click', as
     const precioVenta = parseFloat(row.cells[3].textContent);
     
     // Realizamos la llamada a la API para obtener los datos del artículo completo, incluyendo saldo y costo
-    const response = await fetch(`http://localhost:8080/api/articulo/${articuloId}`);
+    const response = await fetch(`${API_URL}/articulo/${articuloId}`);
 
     // Verificar si la respuesta es exitosa
     if (!response.ok) {
@@ -548,7 +551,7 @@ document.querySelector('#articleModal .data-table').addEventListener('click', as
     const clienteId = 2;  // Asegúrate de que esto sea el cliente correcto
 
     // Realizar la llamada para obtener los datos del NIT, que incluyen el plazo
-    const nitResponse = await fetch(`http://localhost:8080/api/nit/${clienteId}`);
+    const nitResponse = await fetch(`${API_URL}/nit/${clienteId}`);
 
     if (!nitResponse.ok) {
         console.error("Error al obtener el NIT del cliente");
@@ -629,7 +632,7 @@ function closeModal(modalId) {
 async function inicializarFactura() {
     try {
         // 1. Obtener todas las facturas para calcular el siguiente ID
-        const response = await fetch('http://localhost:8080/api/factura');
+        const response = await fetch(`${API_URL}/factura`);
         const facturas = await response.json();
 
         // Verificar que se obtienen las facturas correctamente
@@ -663,7 +666,7 @@ async function inicializarFactura() {
 
                 try {
                     // 4. Obtener los detalles del cliente desde la API de NIT
-                    const nitResponse = await fetch(`http://localhost:8080/api/nit/${clienteId}`);
+                    const nitResponse = await fetch(`${API_URL}/nit/${clienteId}`);
                     const nit = await nitResponse.json();
                     console.log('Detalles del NIT seleccionado:', nit);
                     
@@ -911,22 +914,22 @@ async function guardarFacturaKardexConIdEstimado(facturaId, tipoFactura) {
             const detalle = {
                 factura: {
                     facturaId: facturaId, // ID de la factura
-                    facturaTipo: tipoFactura === '+' ? "VENTA" : "COMPRA" // Determina el tipo de factura
+                    facturaTipo: tipoFactura // "VENTA" o "COMPRA", según el select de naturaleza
                 },
                 articulo: {
                     articuloId: articuloId, // ID del artículo
                     articuloSaldo: articulo.articuloSaldo // Añadir el saldo del artículo
                 },
                 fkardexcantidad: articulo.Unidades, // Usar Unidades en lugar de cantidad
-                fkardexprecio_unitario: tipoFactura === '+' ? articulo.articuloPrecioVenta : articulo.articuloCosto, // Precio según el tipo de factura
-                fkardexsubtotal: articulo.Unidades * (tipoFactura === '+' ? articulo.articuloPrecioVenta : articulo.articuloCosto) // Subtotal
+                fkardexprecio_unitario: tipoFactura === 'VENTA' ? articulo.articuloPrecioVenta : articulo.articuloCosto, // Precio según el tipo de factura
+                fkardexsubtotal: articulo.Unidades * (tipoFactura === 'VENTA' ? articulo.articuloPrecioVenta : articulo.articuloCosto) // Subtotal
             };
 
             // Mostrar el detalle en consola antes de enviarlo
             console.log("Detalle a enviar al servidor:", JSON.stringify(detalle, null, 2));
 
             // Enviar la solicitud POST a la API
-            const response = await fetch('http://localhost:8080/api/facturakardex', {
+            const response = await fetch(`${API_URL}/facturakardex`, {
                 method: 'POST', // Método POST
                 headers: { 
                     'Content-Type': 'application/json' // Indicamos que estamos enviando datos en formato JSON
@@ -935,13 +938,16 @@ async function guardarFacturaKardexConIdEstimado(facturaId, tipoFactura) {
             });
 
             if (!response.ok) {
-                throw new Error(`Error al guardar detalle del artículo ${articulo.articuloNombre}`);
+                let mensaje = `Error al guardar detalle del artículo ${articulo.articuloNombre}`;
+                try { mensaje = (await response.json()).message || mensaje; } catch (e) { /* respuesta sin JSON */ }
+                throw new Error(mensaje);
             }
         }
 
         console.log("Todos los detalles guardados exitosamente.");
     } catch (error) {
         console.error("Error al guardar los detalles de la factura:", error);
+        throw error;
     }
 }
 
@@ -995,7 +1001,7 @@ document.getElementById('clientForm').addEventListener('submit', function(e) {
         nitPlazo
     };
 
-    const url = 'http://localhost:8080/api/nit';
+    const url = `${API_URL}/nit`;
     const method = 'POST';
 
     console.log('Cliente a enviar:', cliente);
@@ -1032,7 +1038,7 @@ document.querySelector('#clientsTableBody').addEventListener('click', async (e) 
     if (!confirmDelete) return;
 
     try {
-        const response = await fetch(`http://localhost:8080/api/nit/${nitId}`, {
+        const response = await fetch(`${API_URL}/nit/${nitId}`, {
             method: 'DELETE'
         });
 
@@ -1050,7 +1056,7 @@ document.querySelector('#clientsTableBody').addEventListener('click', async (e) 
 
 // Obtener y renderizar artículos
 function cargarArticulosDesdeAPI() {
-    fetch('http://localhost:8080/api/articulo')
+    fetch(`${API_URL}/articulo`)
         .then(response => {
             if (!response.ok) throw new Error('Error en la respuesta del servidor');
             return response.json();
@@ -1110,7 +1116,7 @@ document.getElementById('articleForm').addEventListener('submit', function (e) {
         return;
     }
 
-    fetch('http://localhost:8080/api/articulo', {
+    fetch(`${API_URL}/articulo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(articulo)
@@ -1140,7 +1146,7 @@ document.querySelector('#mainArticlesTableBody').addEventListener('click', async
     if (!confirmacion) return;
 
     try {
-        const respuesta = await fetch(`http://localhost:8080/api/articulo/${id}`, {
+        const respuesta = await fetch(`${API_URL}/articulo/${id}`, {
             method: 'DELETE'
         });
 
@@ -1160,7 +1166,7 @@ document.addEventListener('DOMContentLoaded', cargarArticulosDesdeAPI);
 /* ............................... */
 // Obtener y renderizar las facturas
 function cargarFacturasDesdeAPI() {
-    fetch('http://localhost:8080/api/factura')
+    fetch(`${API_URL}/factura`)
         .then(response => {
             if (!response.ok) throw new Error('Error en la respuesta del servidor');
             return response.json();
@@ -1343,7 +1349,7 @@ document.getElementById('saveInvoice').addEventListener('click', async () => {
     };
 
     try {
-        const facturaResponse = await fetch('http://localhost:8080/api/factura', {
+        const facturaResponse = await fetch(`${API_URL}/factura`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1354,6 +1360,9 @@ document.getElementById('saveInvoice').addEventListener('click', async () => {
         if (!facturaResponse.ok) {
             const errorText = await facturaResponse.text();
             console.error('Error al guardar la factura:', facturaResponse.status, errorText);
+            let mensaje = 'No se pudo guardar la factura.';
+            try { mensaje = JSON.parse(errorText).message || mensaje; } catch (e) { /* respuesta sin JSON */ }
+            alert(mensaje);
             return;
         }
 
@@ -1365,6 +1374,6 @@ document.getElementById('saveInvoice').addEventListener('click', async () => {
         alert('Factura y detalles guardados exitosamente.');
     } catch (error) {
         console.error('Error en el proceso de guardado:', error);
-        alert('Error al guardar la factura. Revisa la consola.');
+        alert(error.message || 'Error al guardar la factura. Revisa la consola.');
     }
 });
