@@ -23,7 +23,14 @@ Interfaz web para el sistema de facturación e inventario **KardexOne**. Consume
    ```bash
    git clone https://github.com/juandariver9/SomicSolucionesFrontEnd.git
    ```
-3. Abre `project/index.html` en el navegador (o sírvelo con una extensión como Live Server).
+3. Abre `project/index.html` con una extensión como Live Server (puerto 5500, que es el que el backend permite por defecto).
+
+Para usar otra URL del backend, define `window.KARDEXONE_API_URL` antes de cargar `main.js`:
+
+```html
+<script>window.KARDEXONE_API_URL = 'https://mi-servidor.com/api';</script>
+<script src="main.js"></script>
+```
 
 ## Autor
 
